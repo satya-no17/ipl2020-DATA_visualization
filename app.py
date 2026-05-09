@@ -3,12 +3,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+st.set_page_config(
+    page_title="IPL 2020 Dashboard",
+    page_icon="🏏",
+    layout="wide"
+)
 
+sns.set_style("whitegrid")
+
+@st.cache_data
 def load_data():
     df = pd.read_csv("ipl.csv")
     df['Date'] = pd.to_datetime(df['Date'])
     df = df[df['Date'].dt.year == 2020]
     return df
+
 df = load_data()
 
 all_teams = set()
@@ -21,10 +30,6 @@ st.title("🏏 IPL 2020 Dashboard")
 st.write("Complete IPL 2020 Analysis")
 
 st.divider()
-
-# ---------------------------------
-# KPI SECTION
-# ---------------------------------
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -42,17 +47,7 @@ with col4:
 
 st.divider()
 
-# =================================
-# 2 x 3 PLOTS LAYOUT
-# =================================
-
-# ---------------------------------
-# ROW 1
-# ---------------------------------
-
 col1, col2 = st.columns(2)
-
-# ===== PLOT 1 =====
 
 with col1:
 
@@ -65,6 +60,7 @@ with col1:
     sns.barplot(
         x=team_wins.values,
         y=team_wins.index,
+        palette="viridis",
         ax=ax1
     )
 
@@ -72,8 +68,6 @@ with col1:
     ax1.set_ylabel("Teams")
 
     st.pyplot(fig1)
-
-# ===== PLOT 2 =====
 
 with col2:
 
@@ -86,18 +80,13 @@ with col2:
     ax2.pie(
         toss.values,
         labels=toss.index,
-        autopct='%1.1f%%'
+        autopct='%1.1f%%',
+        startangle=90
     )
 
     st.pyplot(fig2)
 
-# ---------------------------------
-# ROW 2
-# ---------------------------------
-
 col3, col4 = st.columns(2)
-
-# ===== PLOT 3 =====
 
 with col3:
 
@@ -108,17 +97,18 @@ with col3:
     fig3, ax3 = plt.subplots(figsize=(7,5))
 
     sns.barplot(
-        x=pom.values,
-        y=pom.index,
+        x=pom.index,
+        y=pom.values,
+        palette="magma",
         ax=ax3
     )
 
-    ax3.set_xlabel("Awards")
-    ax3.set_ylabel("Players")
+    plt.xticks(rotation=45)
+
+    ax3.set_xlabel("Players")
+    ax3.set_ylabel("Awards")
 
     st.pyplot(fig3)
-
-# ===== PLOT 4 =====
 
 with col4:
 
@@ -130,52 +120,45 @@ with col4:
         df['First_Innings_Score'],
         bins=20,
         kde=True,
+        color='skyblue',
         ax=ax4
     )
 
     ax4.set_xlabel("Runs")
+    ax4.set_ylabel("Frequency")
 
     st.pyplot(fig4)
 
-# ---------------------------------
-# ROW 3
-# ---------------------------------
-
 col5, col6 = st.columns(2)
-
-# ===== PLOT 5 =====
 
 with col5:
 
     st.subheader("🏟️ Top Venues")
 
-    venues = df['Venue'].value_counts().head(10)
+    venues = df['Venue'].value_counts().head(5)
 
-    fig5, ax5 = plt.subplots(figsize=(7,5))
+    fig5, ax5 = plt.subplots(figsize=(6,6))
 
-    sns.barplot(
-        x=venues.values,
-        y=venues.index,
-        ax=ax5
+    ax5.pie(
+        venues.values,
+        labels=venues.index,
+        autopct='%1.1f%%',
+        wedgeprops=dict(width=0.4),
+        startangle=90
     )
 
-    ax5.set_xlabel("Matches")
-
     st.pyplot(fig5)
-
-# ===== PLOT 6 =====
 
 with col6:
 
     st.subheader("🔥 Win Type Analysis")
 
-    win_type = df['Win_Type'].value_counts()
-
     fig6, ax6 = plt.subplots(figsize=(7,5))
 
-    sns.barplot(
-        x=win_type.index,
-        y=win_type.values,
+    sns.countplot(
+        x='Win_Type',
+        data=df,
+        palette='coolwarm',
         ax=ax6
     )
 
@@ -183,10 +166,6 @@ with col6:
     ax6.set_ylabel("Count")
 
     st.pyplot(fig6)
-
-# ---------------------------------
-# DATASET
-# ---------------------------------
 
 st.divider()
 
